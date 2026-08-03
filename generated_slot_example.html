@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Slot - Demo móvel inspirado</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#2b1f12;
+      --gold1:#d4a11a;
+      --gold2:#f5d37a;
+      --accent:#f39c12;
+      --muted:#bfbfbf;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(#0b1020,#182032);font-family:Inter, Arial, sans-serif;color:#fff}
+    .app{max-width:420px;margin:0 auto;height:100vh;display:flex;flex-direction:column;align-items:stretch}
+    /* Top hero (imagem / estátua estilizada) */
+    .hero{
+      height:220px;
+      background:linear-gradient(120deg,#2b4660 0%, #3b2b1a 60%, #6b3b0b 100%);
+      position:relative;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      padding-bottom:10px;
+      border-bottom-left-radius:14px;
+      border-bottom-right-radius:14px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.6) inset;
+    }
+    .hero .title{
+      background:linear-gradient(90deg,var(--gold1),var(--gold2));
+      -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;
+      font-size:20px;letter-spacing:1px;padding:6px 14px;border-radius:6px;border:2px solid rgba(255,255,255,0.06)
+    }
+    .statue{
+      position:absolute;top:16px;left:50%;transform:translateX(-50%);width:160px;height:160px;
+      background:radial-gradient(circle at 30% 20%, #ffd86b, #c68900 50%, #7f5a00 100%);
+      border-radius:10px;opacity:0.95;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 8px 30px rgba(0,0,0,0.6), 0 0 12px rgba(255,200,60,0.08) inset;
+      font-weight:900;color:#5b2f00;font-size:40px;
+    }
+
+    /* Main game area with reels and side multipliers */
+    .game-area{display:flex;flex:1;padding:12px;gap:8px}
+    .reels-wrap{flex:1;background:linear-gradient(#3b2b1a,#2a1e14);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    .reels{width:100%;max-width:300px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,72px);gap:8px}
+    .cell{
+      background:linear-gradient(180deg,#3f2b20,#2d2119);
+      border-radius:8px;border:3px solid rgba(0,0,0,0.4);
+      display:flex;align-items:center;justify-content:center;font-size:34px;user-select:none;
+      color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.6);
+    }
+    .wild{
+      font-size:28px;padding:6px 8px;border-radius:8px;background:linear-gradient(90deg,#ffd86b,#ff9f2a);color:#5b2f00;font-weight:800;border:2px solid rgba(0,0,0,0.25);
+    }
+
+    /* Right column multipliers */
+    .side{width:82px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center}
+    .mult{width:64px;height:48px;border-radius:8px;background:#2a1e14;border:3px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--gold2);box-shadow:0 4px 12px rgba(0,0,0,0.6)}
+    .mult.highlight{box-shadow:0 0 18px rgba(255,215,80,0.35);border-color:rgba(255,200,60,0.45);background:linear-gradient(90deg,#ffd86b,#ffb84a)}
+    .mult small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+
+    /* Info and controls bottom */
+    .info{padding:12px;display:flex;flex-direction:column;gap:8px}
+    .payline{display:flex;align-items:center;justify-content:space-between;font-weight:700;color:var(--muted)}
+    .controls{display:flex;align-items:center;gap:12px;justify-content:space-between}
+    .bet-box{background:#2a1f18;padding:6px 8px;border-radius:8px;display:flex;align-items:center;gap:8px}
+    .bet-btn{background:rgba(0,0,0,0.35);color:#fff;padding:6px 10px;border-radius:8px;border:0;font-weight:700}
+    .spin-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .spin-btn{
+      width:96px;height:96px;border-radius:50%;background:linear-gradient(180deg,#ffb84a,#d67f00);
+      display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#4a2b00;border:6px solid rgba(255,255,255,0.06);
+      box-shadow:0 10px 30px rgba(214,127,0,0.35), 0 0 18px rgba(255,200,60,0.12);
+    }
+    .small-btn{background:#2a1f18;border-radius:8px;padding:8px 10px;color:var(--muted);border:0}
+    .balance{font-weight:800;color:var(--gold2)}
+    @media(max-width:420px){
+      .statue{width:120px;height:120px;top:8px}
+      .reels{grid-template-rows:repeat(3,64px)}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="hero" role="banner">
+      <div class="statue" aria-hidden="true">🦅</div>
+      <div class="title">SLOT DEMO</div>
+    </div>
+
+    <div class="game-area">
+      <div class="reels-wrap" aria-live="polite">
+        <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-weight:700;color:var(--muted)">VITÓRIA <span id="lastWin" style="color:var(--gold2);margin-left:8px">0,00</span></div>
+          <div style="font-weight:700;color:var(--muted)">Saldo <span id="balance" class="balance" style="margin-left:6px">100,00</span></div>
+        </div>
+
+        <div class="reels" id="reels">
+          <!-- 9 células -->
+          <div class="cell" data-index="0">🍒</div>
+          <div class="cell" data-index="1">🍋</div>
+          <div class="cell" data-index="2">⭐️</div>
+
+          <div class="cell" data-index="3">🔔</div>
+          <div class="cell" data-index="4"><span class="wild">WILD</span></div>
+          <div class="cell" data-index="5">🍒</div>
+
+          <div class="cell" data-index="6">🍋</div>
+          <div class="cell" data-index="7">⭐️</div>
+          <div class="cell" data-index="8">🔔</div>
+        </div>
+      </div>
+
+      <div class="side" aria-hidden="true">
+        <div class="mult">1x<small>🔸</small></div>
+        <div class="mult">3x<small>🔸</small></div>
+        <div class="mult highlight">100x<small>🔸</small></div>
+        <div class="mult">2x<small>🔸</small></div>
+        <div class="mult">5x<small>🔸</small></div>
+      </div>
+    </div>
+
+    <div class="info">
+      <div class="payline">
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="small-btn" id="autoplay">TaDa</button>
+          <button class="small-btn" id="speed">⚡</button>
+          <button class="small-btn" id="settings">⚙️</button>
+        </div>
+        <div style="font-size:14px;color:var(--muted)">Transação #<span id="tx">17833-462634-93714696</span></div>
+      </div>
+
+      <div class="controls">
+        <div class="bet-box" aria-label="Aposta">
+          <button class="bet-btn" id="dec">−</button>
+          <div style="padding:0 8px;font-weight:800">Aposta <div style="font-size:12px;color:var(--muted)">(<span id="bet">1</span> crédito)</div></div>
+          <button class="bet-btn" id="inc">+</button>
+        </div>
+
+        <div class="spin-wrap">
+          <div id="credits" style="font-weight:800;color:var(--gold2)">Créditos: <span id="creditsVal">100</span></div>
+          <button class="spin-btn" id="spin">GIRAR</button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          <div style="font-size:12px;color:var(--muted)">Versão v_310_13</div>
+          <div style="font-size:12px;color:var(--muted)">Saldo disponível</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Dados do jogo
+  const symbols = ['🍒','🍋','⭐️','🔔'];
+  const wildSymbol = 'WILD';
+  let balance = 100.00;
+  let credits = 100;
+  let bet = 1;
+
+  const cells = Array.from(document.querySelectorAll('.cell'));
+  const creditsVal = document.getElementById('creditsVal');
+  const balanceEl = document.getElementById('balance');
+  const lastWin = document.getElementById('lastWin');
+  const betEl = document.getElementById('bet');
+
+  creditsVal.textContent = credits;
+  balanceEl.textContent = balance.toFixed(2).replace('.',',');
+  betEl.textContent = bet;
+
+  function randSymbol(){
+    // pequena chance de WILD
+    if (Math.random() < 0.06) return wildSymbol;
+    return symbols[Math.floor(Math.random()*symbols.length)];
+  }
+
+  function setCell(index, sym){
+    const el = cells[index];
+    if(sym === wildSymbol){
+      el.innerHTML = '<span class="wild">WILD</span>';
+    } else {
+      el.textContent = sym;
+      el.style.fontSize = '34px';
+    }
+  }
+
+  function spinOnce(){
+    if (credits < bet) { alert('Créditos insuficientes'); return; }
+    credits -= bet;
+    creditsVal.textContent = credits;
+    // animação: ciclos rápidos
+    const spins = 14;
+    for(let i=0;i<spins;i++){
+      setTimeout(()=> {
+        for(let c=0;c<9;c++){
+          setCell(c, randSymbol());
+        }
+      }, i*80);
+    }
+    // resultado final
+    setTimeout(()=> {
+      const final = [];
+      for(let c=0;c<9;c++){
+        final[c] = randSymbol();
+        setCell(c, final[c]);
+      }
+      const payout = evaluate(final);
+      if (payout > 0){
+        credits += payout;
+        balance += payout;
+        lastWin.textContent = payout.toFixed(2).replace('.',',');
+      } else {
+        lastWin.textContent = '0,00';
+      }
+      creditsVal.textContent = credits;
+      balanceEl.textContent = balance.toFixed(2).replace('.',',');
+    }, spins*80 + 120);
+  }
+
+  function evaluate(grid){
+    // Avaliar somente a linha do meio (simples) para exemplo: índices 3,4,5 (segunda linha)
+    const rowMid = [3,4,5].map(i => grid[i]);
+    // se tiver wild, conte como qualquer outro para formar combinações
+    // regra: 3 iguais = 10, 2 iguais = 2
+    const [a,b,c] = rowMid;
+    // tratar wild como coringa que combina com qualquer símbolo
+    function equal(x,y){ return x === y || x === wildSymbol || y === wildSymbol; }
+
+    if (equal(a,b) && equal(b,c)){
+      return 10; // 3 iguais
+    }
+    if (equal(a,b) || equal(a,c) || equal(b,c)){
+      return 2; // 2 iguais
+    }
+    return 0;
+  }
+
+  // Eventos UI
+  document.getElementById('spin').addEventListener('click', spinOnce);
+  document.getElementById('inc').addEventListener('click', ()=>{
+    bet = Math.min(10, bet+1);
+    betEl.textContent = bet;
+  });
+  document.getElementById('dec').addEventListener('click', ()=>{
+    bet = Math.max(1, bet-1);
+    betEl.textContent = bet;
+  });
+
+  // Atalho: toque na área dos rolos para animar (teste)
+  document.getElementById('reels').addEventListener('click', ()=> {
+    // pequena animação visual
+    cells.forEach((el,i)=> el.style.transform='translateY(-6px)');
+    setTimeout(()=> cells.forEach((el)=> el.style.transform=''),120);
+  });
+
+  // Ajuste: salvar ou restaurar estado poderia ser adicionado aqui
+</script>
+</body>
+</html>
