@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Slot Code Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 120px; }
+    pre { background:#f5f5f5; padding:10px; overflow:auto; max-height: 500px; }
+    button { padding:8px 12px; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <h1>Gerador de código de Slot (protótipo)</h1>
+  <label>Descreva o slot que deseja (ex.: "slot 3 rolos, 5 símbolos, som, paga X"): </label>
+  <textarea id="prompt">Gerar um jogo de slot simples em HTML/JS com 3 rolos, 3 símbolos por rolo, botão Girar, tela de crédito e animação simples.</textarea>
+  <div>
+    <label>Formato de saída: </label>
+    <select id="lang">
+      <option value="html">HTML/JS</option>
+      <option value="javascript">JavaScript (módulo)</option>
+      <option value="csharp">C# (Unity)</option>
+      <option value="gdscript">GDScript (Godot)</option>
+    </select>
+  </div>
+  <button id="send">Gerar código</button>
+  <h2>Código gerado</h2>
+  <pre id="result">Aguardando...</pre>
+  <script>
+    document.getElementById('send').onclick = async () => {
+      const message = document.getElementById('prompt').value;
+      const language = document.getElementById('lang').value;
+      document.getElementById('result').textContent = 'Gerando...';
+      try {
+        const r = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, language })
+        });
+        const data = await r.json();
+        if (data.error) document.getElementById('result').textContent = 'Erro: ' + JSON.stringify(data);
+        else document.getElementById('result').textContent = data.code;
+      } catch (e) {
+        document.getElementById('result').textContent = 'Erro: ' + e.message;
+      }
+    };
+  </script>
+</body>
+</html>
